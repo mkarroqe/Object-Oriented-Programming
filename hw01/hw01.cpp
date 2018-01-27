@@ -17,28 +17,41 @@ void resetFlags(ifstream& inFile) {
 }
 
 // takes encrypted char and returns decrypted char
-char decryptChar(char& encryptedChar, int key) {
+char decryptChar(char& encryptedChar, const int& key) {
 	char decryptedChar;
+	int shift;
+	shift = encryptedChar - key;
+	// if caps, loop through 65-90 range
+	if (encryptedChar >= 65 || encryptedChar <= 90) {
+		if (shift < 65) {
+			shift = 90 - (65 - shift); // ????
+		}
+	}
+	// else if lower, loop through 97-122 range
+	else if (encryptedChar >= 97 || encryptedChar <= 122) {
+		if (shift < 97) {
+			shift = 122 - (97 - shift);
+		}
+	}
+	else {
+		cerr << "something's unexpected" << endl;
+	}
 
-	decryptedChar = int(encryptedChar) + key; // change this
-
+	decryptedChar = shift;
 	return decryptedChar;
 }
 
 // 	decrypts string ref using helper function decryptChar
-void decryptString(string& encryptedString, int key, vector<string>& decryptedLines) {
+void decryptString(string& encryptedString, const int& key, vector<string>& decryptedLines) {
 	string decryptedString = "";
 	for (char c : encryptedString) {
 		decryptedString += decryptChar(c, key);
 	}
 	decryptedLines.push_back(decryptedString);
-	cout << "decrypted line: " << decryptedString << endl; 
 }
 
 void reverseOrder(vector<string>& decryptedLines) {
 	vector<string> reversed;
-	cout << "i'm here" << endl;
-	cout << "decryptedLines.size(): " << decryptedLines.size() << endl;
 
 	// backward loop, using while because when size_t became negative values got weird
 	size_t current = decryptedLines.size() - 1;
@@ -60,10 +73,10 @@ int getKey(ifstream& inFile) {
 		cout << "----------" << endl;
 		cout << "key: " << key << endl;
 		cout << "----------" << endl;
+		return key;
 	}
 
-	// last "int key" found will be returned (and there's only one?)
-	return key;
+	return -1;
 }
 
 int main() {
@@ -89,14 +102,12 @@ int main() {
 
 	inFile.clear(); // so we don't reread the first "key" line
 	while (getline(inFile, line)) {
-		cout << "encrypted line: " << line << endl;
 		decryptString(line, key, decryptedLines);
-		cout << "----------" << endl;
-
 	}
 
 	reverseOrder(decryptedLines);
 
+	// printing final result
 	for (string line : decryptedLines) {
 		cout << line << endl;
 	}
